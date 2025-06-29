@@ -45,3 +45,6 @@ def validate_config():
 WEB_HOST = os.getenv("WEB_HOST", "0.0.0.0")
 WEB_PORT = int(os.getenv("WEB_PORT", "5000"))
 WEB_DEBUG = os.getenv("WEB_DEBUG", "true").lower() == "true"
+
+# 分析任务配置
+ANALYSIS_TIME = 86400  # 每天(86400秒)分析一次
