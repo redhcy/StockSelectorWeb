@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票热点分析系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        .analysis-result {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .stock-card {
+            border-left: 4px solid #0d6efd;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">
+                            <i class="bi bi-graph-up"></i> 股票热点分析系统
+                        </h2>
+                        
+                        <div class="mb-4">
+                            <h5><i class="bi bi-info-circle"></i> 功能说明</h5>
+                            <p>点击下方按钮，系统将分析东方财富网等最新热点话题，推荐相关概念股票，并提供基本面与技术面分析。</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="analyzeBtn" class="btn btn-primary btn-lg">
+                                <i class="bi bi-lightning-charge"></i> 立即分析热点股票
+                            </button>
+                        </div>
+                        
+                        <div id="loading" class="loading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            <p class="mt-2">正在分析热点数据，请稍候...</p>
+                        </div>
+                        
+                        <div id="resultContainer" class="analysis-result mt-4" style="display: none;">
+                            <h4><i class="bi bi-bar-chart-line"></i> 分析结果</h4>
+                            <div class="mb-3">
+                                <small class="text-muted" id="analysisTime"></small>
+                            </div>
+                            <div id="hotspotAnalysis"></div>
+                            <hr>
+                            <h5 class="mt-4"><i class="bi bi-stars"></i> 推荐股票</h5>
+                            <div id="stockRecommendations"></div>
+                            <hr>
+                            <div id="conclusion" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('analyzeBtn').addEventListener('click', function() {
+            const btn = this;
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            // 显示加载状态
+            btn.disabled = true;
+            loading.style.display = 'block';
+            resultContainer.style.display = 'none';
+            
+            // 发送分析请求
+            fetch('/analyze_hotspots', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sources: ['东方财富']
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 模拟结果展示（实际项目中应从API获取真实数据）
+                    const now = new Date();
+                    document.getElementById('analysisTime').textContent = '分析时间: ' + now.toLocaleString();
+                    
+                    // 模拟热点分析结果
+                    document.getElementById('hotspotAnalysis').innerHTML = `
+                        <div class="alert alert-info">
+                            <h6>热点概念分析</h6>
+                            <p>人工智能、新能源和半导体板块今日表现活跃，资金流入明显...</p>
+                        </div>
+                    `;
+                    
+                    // 模拟股票推荐
+                    const stocksHtml = `
+                        <div class="card mb-3 stock-card">
+                            <div class="card-body">
+                                <h5>宁德时代 (300750)</h5>
+                                <p><strong>相关概念:</strong> 新能源、锂电池</p>
+                                <p><strong>基本面:</strong> PE 35.2, ROE 18.6%, 业绩稳定增长</p>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p><strong>支撑位:</strong> ¥210.50</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>压力位:</strong> ¥235.80</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>上涨空间:</strong> 12.5%</p>
+                                    </div>
+                                </div>
+                                <p><strong>明日预测:</strong> 有望突破压力位，建议关注</p>
+                            </div>
+                        </div>
+                        <div class="card mb-3 stock-card">
+                            <div class="card-body">
+                                <h5>中芯国际 (688981)</h5>
+                                <p><strong>相关概念:</strong> 半导体、国产替代</p>
+                                <p><strong>基本面:</strong> PE 42.5, ROE 12.3%, 研发投入增加</p>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p><strong>支撑位:</strong> ¥48.30</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>压力位:</strong> ¥52.80</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>上涨空间:</strong> 9.3%</p>
+                                    </div>
+                                </div>
+                                <p><strong>明日预测:</strong> 震荡上行概率大</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('stockRecommendations').innerHTML = stocksHtml;
+                    
+                    // 模拟结论
+                    document.getElementById('conclusion').innerHTML = `
+                        <h5><i class="bi bi-lightbulb"></i> 综合分析结论</h5>
+                        <p>新能源和半导体板块近期资金关注度高，相关龙头股技术形态良好，建议重点关注...</p>
+                    `;
+                    
+                    // 显示结果
+                    resultContainer.style.display = 'block';
+                } else {
+                    alert('分析失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('分析过程中出错');
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+                btn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
