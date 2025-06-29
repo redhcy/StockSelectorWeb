@@ -47,4 +47,10 @@ WEB_PORT = int(os.getenv("WEB_PORT", "5000"))
 WEB_DEBUG = os.getenv("WEB_DEBUG", "true").lower() == "true"
 
 # 分析任务配置
+ANALYSIS_TIME = "09:30"  # 每天(09:30分析一次)
+>>>>>>> 8d2d67324a83a9be8dc0ee7d8191034db6cffa6f
+=======
 ANALYSIS_TIME = "09:30"  # 每天上午9:30分析一次
+=======
+ANALYSIS_TIME = "09:30"  # 每天(09:30分析一次)
+>>>>>>> 8d2d67324a83a9be8dc0ee7d8191034db6cffa6f
