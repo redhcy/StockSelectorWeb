@@ -24,7 +24,7 @@ NEWS_SOURCES = [
     "上海证券报",
     "中国证券报",
     "证券日报",
-    "财新网",
+    "东方财富网",
     "21世纪经济报道"
 ]
 
@@ -47,4 +47,4 @@ WEB_PORT = int(os.getenv("WEB_PORT", "5000"))
 WEB_DEBUG = os.getenv("WEB_DEBUG", "true").lower() == "true"
 
 # 分析任务配置
-ANALYSIS_TIME = 86400  # 每天(86400秒)分析一次
+ANALYSIS_TIME = 86400  # 每天(86400秒分析一次)
