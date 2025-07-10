@@ -120,68 +120,55 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // 模拟结果展示（实际项目中应从API获取真实数据）
                     const now = new Date();
                     document.getElementById('analysisTime').textContent = '分析时间: ' + now.toLocaleString();
-                    
-                    // 模拟热点分析结果
-                    document.getElementById('hotspotAnalysis').innerHTML = `
-                        <div class="alert alert-info">
-                            <h6>热点概念分析</h6>
-                            <p>人工智能、新能源和半导体板块今日表现活跃，资金流入明显...</p>
-                        </div>
-                    `;
-                    
-                    // 模拟股票推荐
-                    const stocksHtml = `
-                        <div class="card mb-3 stock-card">
-                            <div class="card-body">
-                                <h5>宁德时代 (300750)</h5>
-                                <p><strong>相关概念:</strong> 新能源、锂电池</p>
-                                <p><strong>基本面:</strong> PE 35.2, ROE 18.6%, 业绩稳定增长</p>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <p><strong>支撑位:</strong> ¥210.50</p>
+                    let content = data.result.analysis;
+                    let resultObj = null;
+                    try {
+                        if (typeof content === 'string') {
+                            let jsonStr = content;
+                            if (content.includes('```json')) {
+                                jsonStr = content.split('```json')[1].split('```')[0].trim();
+                            } else if (content.includes('```')) {
+                                jsonStr = content.split('```')[1].split('```')[0].trim();
+                            }
+                            resultObj = JSON.parse(jsonStr);
+                        } else {
+                            resultObj = content;
+                        }
+                    } catch (e) {
+                        resultObj = null;
+                    }
+                    if (resultObj && resultObj.hotspot_analysis) {
+                        document.getElementById('hotspotAnalysis').innerHTML = `<div class="alert alert-info"><h6>热点概念分析</h6><p>${resultObj.hotspot_analysis.replace(/\n/g, '<br>')}</p></div>`;
+                        // 推荐股票
+                        let stocksHtml = '';
+                        if (Array.isArray(resultObj.stock_recommendations)) {
+                            resultObj.stock_recommendations.forEach(stock => {
+                                stocksHtml += `<div class="card mb-3 stock-card">
+                                    <div class="card-body">
+                                        <h5>${stock.name} (${stock.code})</h5>
+                                        <p><strong>概念:</strong> ${stock.concept}</p>
+                                        <p><strong>基本面:</strong> ${stock.fundamental}</p>
+                                        <p><strong>技术面:</strong> 支撑位: ${stock.technical && stock.technical.support ? stock.technical.support : ''}，压力位: ${stock.technical && stock.technical.resistance ? stock.technical.resistance : ''}，上涨空间: ${stock.technical && stock.technical.upside ? stock.technical.upside : ''}</p>
+                                        <p><strong>明日预测:</strong> ${stock.prediction}</p>
                                     </div>
-                                    <div class="col-md-4">
-                                        <p><strong>压力位:</strong> ¥235.80</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p><strong>上涨空间:</strong> 12.5%</p>
-                                    </div>
-                                </div>
-                                <p><strong>明日预测:</strong> 有望突破压力位，建议关注</p>
-                            </div>
-                        </div>
-                        <div class="card mb-3 stock-card">
-                            <div class="card-body">
-                                <h5>中芯国际 (688981)</h5>
-                                <p><strong>相关概念:</strong> 半导体、国产替代</p>
-                                <p><strong>基本面:</strong> PE 42.5, ROE 12.3%, 研发投入增加</p>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <p><strong>支撑位:</strong> ¥48.30</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p><strong>压力位:</strong> ¥52.80</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p><strong>上涨空间:</strong> 9.3%</p>
-                                    </div>
-                                </div>
-                                <p><strong>明日预测:</strong> 震荡上行概率大</p>
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('stockRecommendations').innerHTML = stocksHtml;
-                    
-                    // 模拟结论
-                    document.getElementById('conclusion').innerHTML = `
-                        <h5><i class="bi bi-lightbulb"></i> 综合分析结论</h5>
-                        <p>新能源和半导体板块近期资金关注度高，相关龙头股技术形态良好，建议重点关注...</p>
-                    `;
-                    
-                    // 显示结果
+                                </div>`;
+                            });
+                        }
+                        document.getElementById('stockRecommendations').innerHTML = stocksHtml;
+                        // 结论
+                        document.getElementById('conclusion').innerHTML = `<div class="alert alert-success"><h6>综合结论</h6><p>${resultObj.conclusion ? resultObj.conclusion.replace(/\n/g, '<br>') : ''}</p></div>`;
+                    } else if (resultObj && resultObj.market_analysis) {
+                        // 兼容旧格式
+                        document.getElementById('hotspotAnalysis').innerHTML = `<div class="alert alert-info"><h6>热点概念分析</h6><p>${resultObj.market_analysis.replace(/\n/g, '<br>')}</p></div>`;
+                        document.getElementById('stockRecommendations').innerHTML = '';
+                        document.getElementById('conclusion').innerHTML = '';
+                    } else {
+                        document.getElementById('hotspotAnalysis').innerHTML = `<div class="alert alert-info"><h6>热点概念分析</h6><p>${content.replace(/\n/g, '<br>')}</p></div>`;
+                        document.getElementById('stockRecommendations').innerHTML = '';
+                        document.getElementById('conclusion').innerHTML = '';
+                    }
                     resultContainer.style.display = 'block';
                 } else {
                     alert('分析失败: ' + data.message);

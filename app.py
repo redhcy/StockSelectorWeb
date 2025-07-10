@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 load_dotenv()  # 确保加载.env文件
-import threading
 from stock_analyzer import StockAnalyzer
 from deepseek_api import DeepseekAPI
 from datetime import datetime
@@ -34,62 +33,39 @@ def analyze_hotspots():
         data = request.get_json()
         sources = data.get('sources', ['东方财富'])
         
-        # 在新线程中执行分析
-        thread = threading.Thread(
-            target=run_analysis,
-            args=(sources,)
-        )
-        thread.start()
-        
-        return jsonify({
-            "status": "success",
-            "message": "热点分析已开始，请稍后查看结果"
-        })
-        
-    except Exception as e:
-        logger.error(f"处理热点分析请求时出错: {e}")
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-
-def run_analysis(sources):
-    """执行热点分析"""
-    try:
-        logger.info("开始热点分析...")
-        
         # 获取热点新闻
         news = analyzer.get_hotspot_news(sources)
-        
         # 构建提示词
-        prompt = analyzer.build_hotspot_prompt(news)
-        
+        prompt = "请综合东方财富网等的最新热点头条与社区话题，分析热点概念板块，推荐明天最有可能涨停的个股，优先推荐中小盘股票或央企国企股票。\n" + analyzer.build_hotspot_prompt(news)
         # 调用Deepseek API
         api = DeepseekAPI()
         response = api.chat_completion([
             {"role": "system", "content": "你是一位专业的股票分析师，擅长分析A股市场热点概念。"},
             {"role": "user", "content": prompt}
         ])
-        
         if not response:
             logger.error("API调用失败")
-            return
-            
+            return jsonify({
+                "status": "error",
+                "message": "API调用失败"
+            }), 500
         # 解析结果
         content = response['choices'][0]['message']['content']
-        
-        # 保存分析结果
         result = {
             "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "analysis": content
         }
-        
-        # TODO: 保存结果到数据库或文件
-        
         logger.info("热点分析完成")
-        
+        return jsonify({
+            "status": "success",
+            "result": result
+        })
     except Exception as e:
-        logger.error(f"执行热点分析时出错: {e}")
+        logger.error(f"处理热点分析请求时出错: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>股票热点分析系统 - 预览模式</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+        .preview-notice {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-notice">
+        <h2>预览模式提示</h2>
+        <p>您正在查看前端界面预览，部分功能需要后端支持</p>
+        <p>点击"立即分析热点股票"按钮将显示模拟数据</p>
+    </div>
+    
+    <iframe src="templates/index.html"></iframe>
+    
+    <p>要查看完整功能，请安装Python环境并运行后端服务</p>
+</body>
+</html>
